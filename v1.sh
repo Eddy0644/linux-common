@@ -11,8 +11,8 @@ appendToBashrc() {
     bashrc_file="$HOME/.bashrc"
   fi
 
-  # Check if the "# appended linux-common v1" line exists in the file
-  if ! grep -q "# appended linux-common v1" "$bashrc_file"; then
+  # Check if the "# appended by linux-common v1" line exists in the file
+  if ! grep -q "# appended by linux-common v1" "$bashrc_file"; then
     # Append the comment and the 'alias' commands to the end of the file
     echo "Adding general quick commands."
     cat >>"$bashrc_file" <<EOL
@@ -77,20 +77,30 @@ declare descriptions=(
   [3]=""
   [4]=""
 )
+failCount=0
+while true; do
 
-# Prompt the user for input and show command details
-echo "Please select a command (1-${#commands[@]}):"
-for i in "${!descriptions[@]}"; do
-  echo "$i - ${descriptions[$i]}"
+  if ((failCount > 6));then
+    echo "Max retries limit exceeded. To avoid looped stdin the script stopped. Please re-run it."
+    exit 0
+  fi
+
+  # Prompt the user for input and show command details
+  echo "Please select a command (1-${#commands[@]}):"
+  for i in "${!descriptions[@]}"; do
+    echo "$i - ${descriptions[$i]}"
+  done
+
+  read -p "Select: " user_input
+
+  # Check if the input is a valid number
+  if [[ $user_input =~ ^[0-9]+$ ]] && ((user_input >= 1 && user_input <= ${#commands[@]})); then
+    selected_command="${commands[$user_input]}"
+    # Execute the selected command
+    eval "$selected_command"
+  else
+    echo "Invalid input. Please enter a valid number."
+    ((failCount++))
+  fi
+
 done
-
-read user_input
-
-# Check if the input is a valid number
-if [[ $user_input =~ ^[0-9]+$ ]] && ((user_input >= 1 && user_input <= ${#commands[@]})); then
-  selected_command="${commands[$user_input]}"
-  # Execute the selected command
-  eval "$selected_command"
-else
-  echo "Invalid input. Please enter a valid number."
-fi

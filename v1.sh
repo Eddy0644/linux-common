@@ -60,12 +60,25 @@ EOL
   fi
 }
 
+fixLocale(){
+  echo "Uncommenting en_US.UTF-8 in locale.gen..."
+  sed -i '/^#[[:space:]]*en_US.UTF-8 UTF-8/s/^#//' /etc/locale.gen
+
+  echo "Uncommenting zh_CN.UTF-8 in locale.gen..."
+  sed -i '/^#[[:space:]]*zh_CN.UTF-8 UTF-8/s/^#//' /etc/locale.gen
+
+  echo "Re-generating locale..."
+  locale-gen
+
+  echo "-----------[Complete!]--------------"
+}
+
 # -------------------- main() -----------------------
 # Define an associative array of commands with descriptions
 declare -A commands=(
   # Replaced by new restart command: pkill plasmashell; screen -dmS psh plasmashell
   [1]="appendToBashrc"
-  [2]=""
+  [2]="fixLocale"
   [3]=''
   [4]=""
 )
@@ -73,7 +86,7 @@ declare -A commands=(
 # Define an associative array of command descriptions
 declare descriptions=(
   [1]="Append quick commands to .bashrc"
-  [2]=""
+  [2]="Fix 'LC_ALL: cannot change locale' problem"
   [3]=""
   [4]=""
 )
